@@ -1,5 +1,7 @@
 /*eslint-env node, jasmine */
 /*eslint no-console: false*/
+
+
 import tools from '../src/surgeonKit';
 
 let {expand} = tools;
@@ -173,3 +175,62 @@ describe('.cx', function () {
     })).toBe('hi-blah-everywhere howru-blah-everywhere')
   })
 })
+
+let { debounce } = tools;
+describe('.debounce', function() {
+  let spy, debouncedFunc;
+  beforeEach(()=> {
+    spy = jasmine.createSpy()
+    debouncedFunc = debounce(spy, 2000);
+    jasmine.clock().install();
+  });
+
+  afterEach(()=> jasmine.clock().uninstall())
+
+  it('should debounce calls when invoke more than once', function() {
+    debouncedFunc()
+    debouncedFunc()
+    debouncedFunc()
+    debouncedFunc()
+    jasmine.clock().tick(2000);
+    expect(spy.calls.count()).toBe(1);
+  })
+
+  it('should debounce calls made under the time (1s) frame apart', function() {
+    setTimeout(debouncedFunc, 0)
+    setTimeout(debouncedFunc, 1000)
+    setTimeout(debouncedFunc, 2000)
+    setTimeout(debouncedFunc, 3000)
+    jasmine.clock().tick(3000);
+    expect(spy.calls.count()).toBe(0);
+    jasmine.clock().tick(2000);
+    expect(spy.calls.count()).toBe(1);
+  })
+
+  it('should call as many times as it takes if calls are made longer apart', function() {
+    setTimeout(debouncedFunc, 0)
+    setTimeout(debouncedFunc, 2000)
+    setTimeout(debouncedFunc, 4000)
+    setTimeout(debouncedFunc, 6000)
+    jasmine.clock().tick(6000);
+    expect(spy.calls.count()).toBe(3);
+    jasmine.clock().tick(1000);
+    expect(spy.calls.count()).toBe(3);
+    jasmine.clock().tick(1000);
+    expect(spy.calls.count()).toBe(4);
+  })
+
+  it('composite should match expectation', function() {
+    setTimeout(debouncedFunc, 1)
+    setTimeout(debouncedFunc, 4)
+
+    jasmine.clock().tick(2000);
+    expect(spy.calls.count()).toBe(0)
+
+    jasmine.clock().tick(1);
+    expect(spy.calls.count()).toBe(0)
+
+    jasmine.clock().tick(3);
+    expect(spy.calls.count()).toBe(1)
+  })
+});

@@ -107,6 +107,19 @@ var tools = {
     return ClonedArray;
   },
 
+
+  debounce (func, debounceTime = 5000) {
+    var runner;
+    return function() {
+      if (!runner){
+        runner = setTimeout(func, debounceTime);
+      }
+      else {
+        clearTimeout(runner) // stop runner
+        runner = setTimeout(func, debounceTime);
+      }
+    }
+  }
 };
 
 export default tools;
